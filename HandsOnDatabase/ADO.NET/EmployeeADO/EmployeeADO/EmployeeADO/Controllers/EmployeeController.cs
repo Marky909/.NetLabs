@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using EmployeeADO.Models;
 using Microsoft.Data.SqlClient;
-using System.Linq.Expressions;
 
 namespace EmployeeADO.Controllers
 {
@@ -61,7 +60,7 @@ namespace EmployeeADO.Controllers
         [HttpGet]
         public IActionResult Details(int id) //details = select
         {
-            EmployeeModel employee = null;
+            EmployeeModel? employee = null;
             using  SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
             string Query = "SELECT Id,FullName,Department,Salary,Email FROM Employee WHERE Id = @Id";
             using SqlCommand command = new SqlCommand(Query, connection);
@@ -85,7 +84,7 @@ namespace EmployeeADO.Controllers
         public IActionResult Edit(int id)
         {
 
-            EmployeeModel employee = null;
+            EmployeeModel? employee = null;
             using SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
             string Query = "SELECT Id,FullName,Department,Salary,Email FROM Employee WHERE Id = @Id";
             using SqlCommand command = new SqlCommand(Query, connection);
