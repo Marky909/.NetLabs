@@ -1,0 +1,28 @@
+<Solution>
+  <Project Path="../MyFirstFormsAPP/MyFirstFormsAPP/CalculatorUsingWinForm.csproj" />
+  <Project Path="02-ControlStatements/02-ControlStatements.csproj" />
+  <Project Path="03-Array/03-Array.csproj" Id="7bccae56-ef25-42c1-a12b-318716ca55ef" />
+  <Project Path="04-OOP/04-OOP introduction.csproj" Id="a59a0607-1bc5-4c1f-a43c-4caead8a4b59" />
+  <Project Path="AbstractClass/AbstractClass.csproj" Id="1837ccc5-e15c-4d26-9292-b29edb5bb7ec" />
+  <Project Path="AsyncDemo/AsyncDemo.csproj" Id="b98b3914-0244-4f30-8c59-baaf25a52a6a" />
+  <Project Path="Attributes/Attributes.csproj" Id="5c47b6dc-cafe-42f6-8b23-59039ccf444b" />
+  <Project Path="basics/01-Basics.csproj" />
+  <Project Path="CalculatorUsingInterface/CalculatorUsingInterface.csproj" Id="cb9cd2bd-049d-48d0-af76-2db23d18a90b" />
+  <Project Path="constructors/constructors.csproj" Id="fe98619d-04df-4668-a789-4435622392e2" />
+  <Project Path="DelegateSinglecast/Delegate.csproj" Id="ad153489-3a4b-4c75-9d13-66fd155b9c0b" />
+  <Project Path="EnumDemo/EnumDemo.csproj" Id="8d549b52-de72-4cd8-bbd3-c4e16f89bdee" />
+  <Project Path="Events_Continuation_of_Delegates/Events_Continuation_of_Delegates.csproj" Id="dea008f3-3321-47ed-8068-b8bb4e466f34" />
+  <Project Path="ExceptionHandling2/ExceptionHandling2.csproj" Id="8c20c648-8057-41c4-8a22-f387d173bdd9" />
+  <Project Path="FileOperatins/FileOperatins.csproj" Id="ca7e2249-944e-40c5-9960-8f05658b6a32" />
+  <Project Path="GenericCollection/GenericCollection.csproj" Id="8a43d7e9-f210-4bdb-80d5-54e7fbce2de9" />
+  <Project Path="Inheritacne/Inheritacne.csproj" Id="95445842-e961-4d58-8db0-60ed35c908e6" />
+  <Project Path="InterfaceDemo/InterfaceDemo.csproj" Id="f9d07d8d-a66e-4b27-8a3e-389674f43cb4" />
+  <Project Path="LINQDemo/LINQDemo.csproj" Id="d89e2ebe-2b1f-4272-b200-ac00953bf8a0" />
+  <Project Path="PartialClass_Real_world_practice_qsn/PartialClass_Real_world_practice_qsn.csproj" Id="15c276e4-ac4a-4701-8969-18c465d7e11b" />
+  <Project Path="partial_class/partial_class.csproj" Id="b78ca7d0-9728-4830-a346-99f06c27a9fb" />
+  <Project Path="SealedClassDemo/SealedClassDemo.csproj" Id="1aefd89f-2f8a-420c-8857-070da4c906a7" />
+  <Project Path="static_class/static_class.csproj" Id="5186ee70-2a73-444d-9db1-41b2f86c55d3" />
+  <Project Path="StringInC#/StringInC#.csproj" Id="336b2b09-36ee-4b4f-a721-5b4cb99ce4b5" />
+  <Project Path="StructDemo/StructDemo.csproj" Id="13c5b111-5c36-4a91-87ab-5214c370fed6" />
+  <Project Path="xecptionHandling/execptionHandling1.csproj" Id="23ae35de-94a8-4dec-a7c7-5c4c7a5db293" />
+</Solution>

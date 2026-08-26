@@ -1,0 +1,11 @@
+﻿using PartialClass_Real_world_practice_qsn;
+Patient p1 = new Patient("P101","marky",21,"Male","9866679731");
+p1.PatientMedicalInfo("0+", "Direahea", "pollen grain", "170cm",70);
+p1.PatientAppointment("sharky", "stomach departement", "2026-07-25");
+p1.BookAppointment("2026-07-26");
+p1.PatientBilling(2000, "Nepal swastha Bima", 500);
+p1.UpdateWeight(10);
+p1.UpdateDiseases("Dystentry");
+p1.RescheduleAppointment("2026-07-29");
+p1.PayBill(1500);
+p1.ShowPatientReport();
