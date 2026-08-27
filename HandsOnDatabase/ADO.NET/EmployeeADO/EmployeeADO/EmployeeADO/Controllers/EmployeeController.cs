@@ -109,7 +109,7 @@ namespace EmployeeADO.Controllers
         {
             using SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
 
-            // Added 'SET' and made sure ID matches your model property casing
+            
             string query = @"UPDATE Employee 
                      SET FullName = @FullName,
                          Department = @Department,
