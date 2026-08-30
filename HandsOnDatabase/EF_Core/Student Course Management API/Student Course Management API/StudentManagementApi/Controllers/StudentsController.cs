@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using StudentManagementApi.Data;
 using StudentManagementApi.Models;
 
@@ -15,33 +16,40 @@ namespace StudentManagementApi.Controllers
         {
             _context = context;
         }
-
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Student>>> GetStudent()
+        public async Task<ActionResult<IEnumerable<Student>>> GetStudents()
         {
-            return await _context.Students.ToListAsync();
+            return await _context.Students
+                .Include(x => x.Department)
+                .ToListAsync();
         }
-
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Student>> GetStudent(int id)
         {
-            var students = await _context.Students.FindAsync(id);
-            if (students == null)
+            var student = await _context.Students
+                .Include(x => x.Department)
+                .FirstOrDefaultAsync(s => s.Id == id);
+
+            if (student == null)
                 return NotFound();
-            return students;
+
+            return student;
         }
 
         [HttpPost]
-        public async Task<ActionResult<Student>> AddStudent([FromBody] Student student)
+        public async Task<ActionResult<Student>> AddStudent([FromBody]Student student)
         {
-           
+            if (student == null)
+                return BadRequest();
             _context.Students.Add(student);
             await _context.SaveChangesAsync();
             return CreatedAtAction(
                 nameof(GetStudent),
-                new {Id = student.Id},
-                student);
+                new {id = student.Id},
+                student
+                );
+
         }
 
         [HttpPut("{id}")]
@@ -81,3 +89,4 @@ namespace StudentManagementApi.Controllers
 
         }
     }
+}
