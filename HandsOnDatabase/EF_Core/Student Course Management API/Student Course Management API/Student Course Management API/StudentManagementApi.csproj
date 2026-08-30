@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Student_Course_Management_API</RootNamespace>
+    <UserSecretsId>83463101-bb2b-41a9-86b4-3a5d65cff7d3</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
