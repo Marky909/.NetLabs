@@ -13,5 +13,9 @@
         public int DepartmentId { get; set; } //Foreign key
 
         public Department? Department { get; set; } //Navigation prop
+
+
+        public ICollection<Enrollment> Enrollments { get; set; }
+            = new List<Enrollment>();
     }
 }
