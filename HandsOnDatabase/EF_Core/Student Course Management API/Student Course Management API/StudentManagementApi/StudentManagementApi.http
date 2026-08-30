@@ -59,3 +59,66 @@ Content-Type: application/json
 
 ###
 DELETE {{StudentManagementApi_HostAddress}}/api/Students/1
+
+
+###
+//courses
+###
+GET {{StudentManagementApi_HostAddress}}/api/Courses
+Accept: application/json
+
+###
+POST {{StudentManagementApi_HostAddress}}/api/Courses
+Content-Type: application/json
+
+{
+  "name": "Database Management System",
+  "credits": 3
+}
+
+###
+POST {{StudentManagementApi_HostAddress}}/api/Courses
+Content-Type: application/json
+
+{
+  "name": "Web Technology",
+  "credits": 3
+}
+
+###
+GET {{StudentManagementApi_HostAddress}}/api/Courses/1
+Accept: application/json
+
+###
+PUT {{StudentManagementApi_HostAddress}}/api/Courses/1
+Content-Type: application/json
+
+{
+  "name": "Advanced Database Management",
+  "credits": 4
+}
+
+###
+DELETE {{StudentManagementApi_HostAddress}}/api/Courses/2
+
+###
+//eNROLLMENT
+###
+POST {{StudentManagementApi_HostAddress}}/api/Enrollments
+Content-Type: application/json
+
+{
+  "studentId": 2,
+  "courseId": 1
+}
+
+###
+GET {{StudentManagementApi_HostAddress}}/api/Enrollments
+Accept: application/json
+
+###
+GET {{StudentManagementApi_HostAddress}}/api/Enrollments/1
+Accept: application/json
+
+###
+DELETE {{StudentManagementApi_HostAddress}}/api/Enrollments/1
