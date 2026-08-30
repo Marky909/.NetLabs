@@ -1,6 +1,4 @@
-@StudentManagementApi_HostAddress = http://localhost:5204
-
-
+@StudentManagementApi_HostAddress = https://localhost:44306
 
 ###
 GET {{StudentManagementApi_HostAddress}}/api/Department
@@ -24,3 +22,40 @@ Content-Type:application/json
 
 ###
 DELETE {{StudentManagementApi_HostAddress}}/api/Department/1
+
+
+###
+
+
+###
+GET {{StudentManagementApi_HostAddress}}/api/Students
+Accept: application/json
+
+###
+GET {{StudentManagementApi_HostAddress}}/api/Students/1
+Accept: application/json
+
+###
+POST {{StudentManagementApi_HostAddress}}/api/Students
+Content-Type: application/json
+
+{
+  "name": "Mark",
+  "email": "mark@example.com",
+  "age": 21,
+  "departmentId": 2
+}
+
+###
+PUT {{StudentManagementApi_HostAddress}}/api/Students/2
+Content-Type: application/json
+
+{
+  "name": "Mark Updated",
+  "email": "mark.updated@example.com",
+  "age": 22,
+  "departmentId": 2
+}
+
+###
+DELETE {{StudentManagementApi_HostAddress}}/api/Students/1
