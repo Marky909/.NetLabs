@@ -31,7 +31,7 @@ namespace StudentManagementApi.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Department>> AddDepartment(Department department)
+        public async Task<ActionResult<Department>> AddDepartment([FromBody] Department department)
         {
             _context.Departments.Add(department);
 
