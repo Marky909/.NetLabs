@@ -12,6 +12,6 @@
 
         public int DepartmentId { get; set; } //Foreign key
 
-        public Department Department { get; set; } = null!;//Navigation prop
+        public Department? Department { get; set; } //Navigation prop
     }
 }
