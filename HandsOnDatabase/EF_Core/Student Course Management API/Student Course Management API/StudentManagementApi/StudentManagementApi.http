@@ -1,6 +1,26 @@
 @StudentManagementApi_HostAddress = http://localhost:5204
 
-GET {{StudentManagementApi_HostAddress}}/weatherforecast/
-Accept: application/json
+
 
 ###
+GET {{StudentManagementApi_HostAddress}}/api/Department
+Acccept:application/json
+
+###
+POST {{StudentManagementApi_HostAddress}}/api/Department
+Content-Type:application/json
+{
+"Name":"Mark"
+}
+
+
+###
+
+PUT {{StudentManagementApi_HostAddress}}/api/Department/2
+Content-Type:application/json
+{
+  "Name":"CSIT"
+}
+
+###
+DELETE {{StudentManagementApi_HostAddress}}/api/Department/1
