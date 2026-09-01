@@ -23,6 +23,7 @@ namespace StudentManagementApi.Controllers
             return await _context.Enrollments
                 .Include(e => e.Student)
                 .Include(e => e.Course)
+                .AsNoTracking()
                 .ToListAsync();
         }
 
@@ -33,6 +34,7 @@ namespace StudentManagementApi.Controllers
             var enrollment = await _context.Enrollments
                 .Include(e => e.Student)
                 .Include(e => e.Course)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(e => e.Id == id);
 
             if (enrollment == null)

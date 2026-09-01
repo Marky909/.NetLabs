@@ -21,6 +21,7 @@ namespace StudentManagementApi.Controllers
         {
             return await _context.Students
                 .Include(x => x.Department)
+                .AsNoTracking()
                 .ToListAsync();
         }
 
@@ -29,6 +30,7 @@ namespace StudentManagementApi.Controllers
         {
             var student = await _context.Students
                 .Include(x => x.Department)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(s => s.Id == id);
 
             if (student == null)

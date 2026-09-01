@@ -19,12 +19,14 @@ namespace StudentManagementApi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Department>>> GetDepartment()
         {
-            return await _context.Departments.ToListAsync();
+            return await _context.Departments
+                .AsNoTracking()
+                .ToListAsync();
         }
         [HttpGet("{id}")]
         public async Task<ActionResult<Department>> GetDepartment(int id)
         {
-            var department =  await _context.Departments.FindAsync(id);
+            var department =  await _context.Departments.AsNoTracking().FirstOrDefaultAsync(c=>c.Id==id);
             if (department == null)
                 return NotFound();
             return department;

@@ -20,14 +20,18 @@ namespace StudentManagementApi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Course>>> GetCourses()
         {
-            return await _context.Courses.ToListAsync();
+            return await _context.Courses
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         // GET: api/Courses/1
         [HttpGet("{id}")]
         public async Task<ActionResult<Course>> GetCourse(int id)
         {
-            var course = await _context.Courses.FindAsync(id);
+            var course = await _context.Courses
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.Id == id);
 
             if (course == null)
                 return NotFound();
