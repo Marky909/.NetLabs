@@ -14,5 +14,15 @@ namespace StudentManagementApi.Data
         public DbSet<Course> Courses { get; set; }
 
         public DbSet<Enrollment> Enrollments { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Student>()
+                .Property(s => s.Name) //this is fluent api i am targetting only the name property validation
+                .IsRequired()
+                .HasMaxLength(100);
+        }
     }
 }
