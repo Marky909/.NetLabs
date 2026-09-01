@@ -122,3 +122,42 @@ Accept: application/json
 
 ###
 DELETE {{StudentManagementApi_HostAddress}}/api/Enrollments/1
+
+###
+# Student
+###
+GET {{StudentManagementApi_HostAddress}}/api/Students
+Accept: application/json
+
+###
+
+GET {{StudentManagementApi_HostAddress}}/api/Students/2
+Accept: application/json
+
+###
+
+POST {{StudentManagementApi_HostAddress}}/api/Students
+Content-Type: application/json
+
+{
+  "name": "John",
+  "email": "john@example.com",
+  "age": 20,
+  "departmentId": 2
+}
+
+###
+
+PUT {{StudentManagementApi_HostAddress}}/api/Students/2
+Content-Type: application/json
+
+{
+  "name": "Mark Updated",
+  "email": "mark.updated@example.com",
+  "age": 22,
+  "departmentId": 2
+}
+
+###
+
+DELETE {{StudentManagementApi_HostAddress}}/api/Students/2
