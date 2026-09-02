@@ -5,7 +5,7 @@ using StudentManagementApi.Models;
 
 namespace StudentManagementApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     [ApiController]
     public class EnrollmentsController : ControllerBase
     {
