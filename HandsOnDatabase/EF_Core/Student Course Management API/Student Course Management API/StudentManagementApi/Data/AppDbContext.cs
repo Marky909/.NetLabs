@@ -33,6 +33,11 @@ namespace StudentManagementApi.Data
                 new Course { Id = 1,Name = "Database Managemnet System",Credits=3},
                 new Course { Id = 2,Name = "Web Technology",Credits=3}
                 );
+
+            modelBuilder.Entity<Student>().HasData(
+                new Student { Id=3,Name = "Mark",Email="MarkDangal@gmail.com",Age=21,DepartmentId=1},
+                new Student { Id=4,Name = "Shark",Email="SharkAquatic@gmail.com",Age=21,DepartmentId=2}
+                );
         }
     }
 }
