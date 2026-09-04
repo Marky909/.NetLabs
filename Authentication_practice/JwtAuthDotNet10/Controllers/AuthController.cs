@@ -78,7 +78,7 @@ namespace JwtAuthDotNet10.Controllers
 
             //2.read the secret key from the configuration
 
-            var SecretKey = _configuration.GetValue<string>("AppSetings:Token") ?? throw new InvalidOperationException("Jwt secret Token is missing in appsettings.json");
+            var SecretKey = _configuration.GetValue<string>("Appsetting:Token") ?? throw new InvalidOperationException("Jwt secret Token is missing in appsettings.json");
 
             //3.convert the secret string into symmetric byte array
 
@@ -95,8 +95,8 @@ namespace JwtAuthDotNet10.Controllers
                 Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.UtcNow.AddMinutes(15),
                 SigningCredentials = creds,
-                Issuer = _configuration.GetValue<string>("AppSettings:Issuer"),
-                Audience = _configuration.GetValue<string>("AppSettings:Audeience")
+                Issuer = _configuration.GetValue<string>("Appsetting:Issuer"),
+                Audience = _configuration.GetValue<string>("Appsetting:Audeience")
             };
 
             //6. serialize token to raw compact jwt String
