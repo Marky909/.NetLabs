@@ -5,12 +5,17 @@ using JwtAuthDotNet10.Entities;
 using Microsoft.AspNetCore.Identity;
 using JwtAuthDotNet10.Models;
 using Microsoft.EntityFrameworkCore;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
+
 
 namespace JwtAuthDotNet10.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthController(UserDbContext _context ) : ControllerBase
+    public class AuthController(UserDbContext _context ,IConfiguration _configuration ) : ControllerBase
     {
         private readonly PasswordHasher<User> _passwordHasher = new();
 
@@ -38,7 +43,7 @@ namespace JwtAuthDotNet10.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<String>> Login(UserDTO request)
+        public async Task<ActionResult<TokenResponseDto>> Login(UserDTO request)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == request.UserName);
             if(user is null)
@@ -54,7 +59,51 @@ namespace JwtAuthDotNet10.Controllers
             if (VerificationResult == PasswordVerificationResult.Failed)
                 return BadRequest("Invalid Username or password");
 
-            return Ok("Login Successfull! Identity Confirmed");
+            //Generatee the JWT token for the authenticated user
+
+            string token = CreateToken(user);
+
+            return Ok(new TokenResponseDto { AccessToken = token});
+        }
+
+        private string CreateToken(User user)
+        {
+            //1.Define the claims
+
+            var claims = new List<Claim>
+            {
+                new (ClaimTypes.NameIdentifier,user.Id.ToString()),
+                new (ClaimTypes.Name,user.UserName)
+            };
+
+            //2.read the secret key from the configuration
+
+            var SecretKey = _configuration.GetValue<string>("AppSetings:Token") ?? throw new InvalidOperationException("Jwt secret Token is missing in appsettings.json");
+
+            //3.convert the secret string into symmetric byte array
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(SecretKey));
+
+            //4.combine key with the cryptographic sigining algo
+
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+
+            //5.Build the token descriptor
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddMinutes(15),
+                SigningCredentials = creds,
+                Issuer = _configuration.GetValue<string>("AppSettings:Issuer"),
+                Audience = _configuration.GetValue<string>("AppSettings:Audeience")
+            };
+
+            //6. serialize token to raw compact jwt String
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+
+            return tokenHandler.WriteToken(token);
         }
     }
 }
