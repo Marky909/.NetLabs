@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using JwtAuthDotNet10.Data;
 using JwtAuthDotNet10.Entities;
 using Microsoft.AspNetCore.Identity;
@@ -9,6 +8,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace JwtAuthDotNet10.Controllers
@@ -104,6 +104,21 @@ namespace JwtAuthDotNet10.Controllers
             var token = tokenHandler.CreateToken(tokenDescriptor);
 
             return tokenHandler.WriteToken(token);
+        }
+
+        [Authorize]
+        [HttpGet("profile")]
+        public IActionResult GetProfile()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var username = User.FindFirstValue(ClaimTypes.Name);
+
+            return Ok(new
+            {
+                Message = "Access Granted to secure profile",
+                UserId = userId,
+                Username = username
+            });
         }
     }
 }
