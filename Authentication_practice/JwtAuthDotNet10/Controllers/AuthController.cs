@@ -73,7 +73,8 @@ namespace JwtAuthDotNet10.Controllers
             var claims = new List<Claim>
             {
                 new (ClaimTypes.NameIdentifier,user.Id.ToString()),
-                new (ClaimTypes.Name,user.UserName)
+                new (ClaimTypes.Name,user.UserName),
+                new(ClaimTypes.Role,user.Role)
             };
 
             //2.read the secret key from the configuration
@@ -120,5 +121,28 @@ namespace JwtAuthDotNet10.Controllers
                 Username = username
             });
         }
+
+        [Authorize]
+        [HttpGet("user-only")]
+        public IActionResult GetUserData()
+        {
+            return Ok(new
+            {
+                Message = "Success you are authenticated!",
+                Username = User.Identity?.Name
+            });
+        }
+
+        [Authorize(Roles ="Admin")]
+        [HttpGet("admin-only")]
+        public IActionResult GetAdminData()
+        {
+            return Ok(new
+            {
+                Message = "Welcome to the secret admin panel",
+            });
+        }
+
+
     }
 }
