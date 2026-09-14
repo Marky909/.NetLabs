@@ -9,5 +9,14 @@ namespace EcommerceApi.Data
         public DbSet<User> Users { get; set; }
         public DbSet<Product> products { get; set; }
         public DbSet<Seller> Sellers { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.ApplyConfigurationsFromAssembly(
+                typeof(EcommerceDbContext).Assembly);
+
+        }
     }
+
+    
 }
