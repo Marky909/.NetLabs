@@ -4,6 +4,10 @@ using EcommerceApi.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace EcommerceApi.Controllers
 {
@@ -13,22 +17,24 @@ namespace EcommerceApi.Controllers
     {
         private readonly EcommerceDbContext _context;
         private readonly IPasswordHasher<User> _passwordHasher;
+        private readonly IConfiguration _configuration;
 
 
-        public AuthController(EcommerceDbContext context,IPasswordHasher<User> passwordHasher)
+        public AuthController(EcommerceDbContext context,IPasswordHasher<User> passwordHasher,IConfiguration configuration)
         {
             _context = context;
             _passwordHasher = passwordHasher;
+            _configuration = configuration;
         }
 
 
         [HttpPost("register")]
         public async Task<ActionResult> Register(RegisterRequest request)
         {
-            var existingUser = await _context.Users.AnyAsync(u => u.Email == request.Email);
+            bool existingUser = await _context.Users.AnyAsync(u => u.Email == request.Email);
             if (existingUser)
                 return BadRequest("Email is already Registered");
-            var user = new User
+            User user = new User
             {
                 Username=request.Username,
                 Email=request.Email
@@ -52,7 +58,7 @@ namespace EcommerceApi.Controllers
         [HttpPost("login")]
         public async Task<ActionResult> Login(LoginRequest request)
         {
-            var user = await _context.Users
+            User? user = await _context.Users
                 .FirstOrDefaultAsync(u => u.Email == request.Email);
 
             if (user == null)
@@ -60,7 +66,7 @@ namespace EcommerceApi.Controllers
                 return Unauthorized("Invalid email or password.");
             }
 
-            var result = _passwordHasher.VerifyHashedPassword(
+            PasswordVerificationResult result = _passwordHasher.VerifyHashedPassword(
                 user,
                 user.PasswordHash,
                 request.Password);
@@ -70,13 +76,33 @@ namespace EcommerceApi.Controllers
                 return Unauthorized("Invalid email or password.");
             }
 
-            return Ok(new
+           
+
+            List<Claim> claims = new List<Claim>
             {
-                message = "Login successful.",
-                user.Id,
-                user.Username,
-                user.Email,
-                user.Role
+                new Claim(ClaimTypes.NameIdentifier,user.Id.ToString()),
+                new Claim(ClaimTypes.Name,user.Username),
+                new Claim(ClaimTypes.Role,user.Role),
+            };
+
+            var key = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(_configuration["Jwt:key"]!));
+
+            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: _configuration["Jwt:Issuer"],
+                audience: _configuration["Jwt:Audience"],
+                claims: claims,
+                expires: DateTime.UtcNow.AddMinutes(60),
+                signingCredentials: credentials
+                );
+
+            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
+
+            return Ok(new 
+            {
+                token = jwt
             });
         }
 
