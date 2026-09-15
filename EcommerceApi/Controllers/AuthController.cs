@@ -85,12 +85,12 @@ namespace EcommerceApi.Controllers
                 new Claim(ClaimTypes.Role,user.Role),
             };
 
-            var key = new SymmetricSecurityKey(
+            SymmetricSecurityKey key = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(_configuration["Jwt:key"]!));
 
-            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            SigningCredentials credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            var token = new JwtSecurityToken(
+            JwtSecurityToken token = new JwtSecurityToken(
                 issuer: _configuration["Jwt:Issuer"],
                 audience: _configuration["Jwt:Audience"],
                 claims: claims,
@@ -98,7 +98,7 @@ namespace EcommerceApi.Controllers
                 signingCredentials: credentials
                 );
 
-            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
+            string jwt = new JwtSecurityTokenHandler().WriteToken(token);
 
             return Ok(new 
             {
