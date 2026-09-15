@@ -1,7 +1,6 @@
 ﻿using EcommerceApi.Data;
 using EcommerceApi.DTOs;
 using EcommerceApi.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -49,5 +48,37 @@ namespace EcommerceApi.Controllers
                 );
 
         }
+
+        [HttpPost("login")]
+        public async Task<ActionResult> Login(LoginRequest request)
+        {
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Email == request.Email);
+
+            if (user == null)
+            {
+                return Unauthorized("Invalid email or password.");
+            }
+
+            var result = _passwordHasher.VerifyHashedPassword(
+                user,
+                user.PasswordHash,
+                request.Password);
+
+            if (result == PasswordVerificationResult.Failed)
+            {
+                return Unauthorized("Invalid email or password.");
+            }
+
+            return Ok(new
+            {
+                message = "Login successful.",
+                user.Id,
+                user.Username,
+                user.Email,
+                user.Role
+            });
+        }
+
     }
 }
