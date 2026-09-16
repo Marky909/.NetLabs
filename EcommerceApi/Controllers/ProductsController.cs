@@ -43,10 +43,46 @@ namespace EcommerceApi.Controllers
                 }).ToListAsync();
             return Ok(products);
         }
+
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<ProductResponse>> Getproducts(int id )
+        {
+            var products = await _context.Products
+                .AsNoTracking()
+                .Where(p => p.Id == id)
+                .Select(p => new ProductResponse
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Price = p.Price,
+                    Stock = p.Stock,
+                    Seller = new SellerResponse
+                    {
+                        Id = p.Seller.Id,
+                        StoreName = p.Seller.StoreName
+                    },
+                    Category = new CategoryResponse
+                    {
+                        Id = p.Category.Id,
+                        Name = p.Category.Name
+                    }
+                })
+
+                .FirstOrDefaultAsync();
+
+            if (products == null)
+                return NotFound("product not found");
+            return Ok(products);
+        }
+
         [Authorize(Roles = "Seller")]
         [HttpPost]
         public async Task<ActionResult> CreateProduct(CreateProductRequest request)
         {
+            var CatagoryExist = await _context.Categories.AnyAsync(c => c.Id == request.CategoryId);
+            if (!CatagoryExist)
+                return BadRequest("Category Not Found!");
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
 
             if (userIdClaim == null)
@@ -83,6 +119,9 @@ namespace EcommerceApi.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateProduct(int id,UpdateProductRequest request)
         {
+            var CatagoryExist = await _context.Categories.AnyAsync(c => c.Id == request.CategoryId);
+            if (!CatagoryExist)
+                return BadRequest("Category Not Found!");
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim == null)
                 return Unauthorized();
