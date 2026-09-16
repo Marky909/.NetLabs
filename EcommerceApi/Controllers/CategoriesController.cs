@@ -43,7 +43,7 @@ namespace EcommerceApi.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> AddCategory(int id,CreateCategoryRequest request)
+        public async Task<ActionResult> AddCategory(CreateCategoryRequest request)
         {
             var category = new Category
             {
