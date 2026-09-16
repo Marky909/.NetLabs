@@ -121,6 +121,19 @@ namespace EcommerceApi.Controllers
                 role
             });
         }
+        [Authorize(Roles = "Admin")]
+        [HttpGet("admin")]
+        public IActionResult AdminOnly()
+        {
+            return Ok("You are an Admin.");
+        }
+
+        [Authorize(Roles = "Seller")]
+        [HttpGet("seller")]
+        public IActionResult SellerOnly()
+        {
+            return Ok("You are a Seller.");
+        }
 
     }
 }
