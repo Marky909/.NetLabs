@@ -78,5 +78,32 @@ namespace EcommerceApi.Controllers
 
             return Ok(product);
         }
-    }
-}
+
+        [Authorize(Roles="seller")]
+        [HttpPut("{id}")]
+        public async Task<ActionResult> UpdateProduct(int id,UpdateProductRequest request)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+                return Unauthorized();
+            var UserId = int.Parse(userIdClaim.Value);
+
+            var product = await _context.Products
+                .Include(p => p.Seller)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (product == null)
+                return NotFound("product not found");
+
+            if (product.Seller.UserId != UserId)
+                return Forbid();
+
+            product.Name = request.Name;
+            product.Price = request.Price;
+            product.Stock = request.Stock;
+            product.CategoryId = request.CategoryId;
+            await _context.SaveChangesAsync();
+
+            return Ok(product);
+        }
+
