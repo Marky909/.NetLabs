@@ -8,7 +8,6 @@ public class CreateProductRequest
 
     public int Stock { get; set; }
 
-    public int SellerId { get; set; }
 
     public int CategoryId { get; set; }
 }
