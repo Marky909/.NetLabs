@@ -12,7 +12,7 @@ namespace EcommerceApi.Controllers
     public class SellerController(EcommerceDbContext _context) : ControllerBase
     {
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Seller> GetSeller()
+        public async Task<ActionResult<IEnumerable<Seller>> GetSellers()
         {
             var sellers = _context.Sellers
                 .AsNoTracking()
