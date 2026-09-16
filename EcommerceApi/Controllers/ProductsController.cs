@@ -4,6 +4,7 @@ using EcommerceApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace EcommerceApi.Controllers
 {
@@ -42,17 +43,33 @@ namespace EcommerceApi.Controllers
                 }).ToListAsync();
             return Ok(products);
         }
-
-        [Authorize(Roles ="seller")]
+        [Authorize(Roles = "Seller")]
         [HttpPost]
         public async Task<ActionResult> CreateProduct(CreateProductRequest request)
         {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null)
+            {
+                return Unauthorized();
+            }
+
+            var userId = int.Parse(userIdClaim.Value);
+
+            var seller = await _context.Sellers
+                .FirstOrDefaultAsync(s => s.UserId == userId);
+
+            if (seller == null)
+            {
+                return BadRequest("Seller profile not found.");
+            }
+
             var product = new Product
             {
                 Name = request.Name,
                 Price = request.Price,
                 Stock = request.Stock,
-                SellerId = request.SellerId,
+                SellerId = seller.Id,
                 CategoryId = request.CategoryId
             };
 
