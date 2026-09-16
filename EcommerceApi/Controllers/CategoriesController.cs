@@ -41,5 +41,25 @@ namespace EcommerceApi.Controllers
 
             return Ok(category);
         }
+
+        [HttpPut("{id}")]
+        public async Task<ActionResult> UpdateCategory(int id,CreateCategoryRequest request)
+        {
+            var category = new Category
+            {
+                Name = request.Name
+            };
+
+            _context.Categories.Add(category);
+            await _context.SaveChangesAsync();
+
+            var response = new CategoryResponse
+            {
+                Id = category.Id,
+                Name = category.Name
+            };
+
+            return Ok(response);
+        }
     }
 }
