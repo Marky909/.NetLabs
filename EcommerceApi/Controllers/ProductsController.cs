@@ -107,3 +107,38 @@ namespace EcommerceApi.Controllers
             return Ok(product);
         }
 
+        [Authorize(Roles = "Seller")]
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> DeleteProduct(int id)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null)
+            {
+                return Unauthorized();
+            }
+
+            var userId = int.Parse(userIdClaim.Value);
+
+            var product = await _context.Products
+                .Include(p => p.Seller)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (product == null)
+            {
+                return NotFound("Product not found.");
+            }
+
+            if (product.Seller.UserId != userId)
+            {
+                return Forbid();
+            }
+
+            _context.Products.Remove(product);
+
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+    }
+}
