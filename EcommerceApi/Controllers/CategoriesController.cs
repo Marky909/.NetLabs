@@ -25,5 +25,21 @@ namespace EcommerceApi.Controllers
 
             return Ok(categories);
         }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult> GetCategory(int id)
+        {
+            var category = await _context.Categories.Select(c => new CategoryResponse
+            {
+                Id = c.Id,
+                Name = c.Name
+            })
+                .FirstOrDefaultAsync(c=>c.Id==id);
+
+            if (category == null)
+                return NotFound("category doesnt exist");
+
+            return Ok(category);
+        }
     }
 }
