@@ -3,7 +3,7 @@ using EcommerceApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using EcommerceApi.DTOs;
-
+using Microsoft.AspNetCore.Authorization;
 namespace EcommerceApi.Controllers
 {
     [ApiController]
@@ -92,6 +92,11 @@ namespace EcommerceApi.Controllers
 
             return Ok(category);
         }
-
+        [Authorize]
+        [HttpGet("protected")]
+        public IActionResult Protected()
+        {
+            return Ok("You are authenticated.");
+        }
     }
 }
