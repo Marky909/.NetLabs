@@ -1,6 +1,7 @@
 ﻿using EcommerceApi.Data;
 using EcommerceApi.DTOs;
 using EcommerceApi.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -103,6 +104,21 @@ namespace EcommerceApi.Controllers
             return Ok(new 
             {
                 token = jwt
+            });
+        }
+        [Authorize]
+        [HttpGet("protected")]
+        public IActionResult Protected()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var username = User.FindFirst(ClaimTypes.Name)?.Value;
+            var role = User.FindFirst(ClaimTypes.Role)?.Value;
+
+            return Ok(new
+            {
+                userId,
+                username,
+                role
             });
         }
 
