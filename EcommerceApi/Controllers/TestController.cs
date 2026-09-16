@@ -37,22 +37,22 @@ namespace EcommerceApi.Controllers
             return Ok(products);
         }
 
-        [HttpPost("Product")]
-        public async Task<ActionResult<Product>> AddProduct(CreateProductRequest request)
-        {
-            var product = new Product()
-            {
-                Name = request.Name,
-                Price = request.Price,
-                Stock = request.Stock,
-                SellerId = request.SellerId,
-                CategoryId = request.CategoryId
-            };
-            _context.Products.Add(product);
-            await _context.SaveChangesAsync();
+        //[HttpPost("Product")]
+        //public async Task<ActionResult<Product>> AddProduct(CreateProductRequest request)
+        //{
+        //    var product = new Product()
+        //    {
+        //        Name = request.Name,
+        //        Price = request.Price,
+        //        Stock = request.Stock,
+        //        SellerId = request.SellerId,
+        //        CategoryId = request.CategoryId
+        //    };
+        //    _context.Products.Add(product);
+        //    await _context.SaveChangesAsync();
 
-            return Ok(product);
-        }
+        //    return Ok(product);
+        //}
 
         [HttpPost("User")]
         public async Task<ActionResult<User>> AddUser([FromBody] User newUser)
