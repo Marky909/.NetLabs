@@ -4,6 +4,8 @@ using EcommerceApi.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EcommerceApi.Controllers
 {
@@ -43,24 +45,37 @@ namespace EcommerceApi.Controllers
 
             return Ok(sellers);
         }
-
+        [Authorize]
         [HttpPost]
         public async Task<ActionResult<SellerResponse>> CreateSeller(CreateSellerRequest request)
         {
-            var userExist =await _context.Users.AnyAsync(u => u.Id == request.UserId);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+                return Unauthorized();
 
-            if (!userExist)
+            var userId = int.Parse(userIdClaim.Value);
+
+            var user=await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user == null)
             {
                 return BadRequest("User Not found!");
             }
+
+            var existingSeller = await _context.Sellers.AnyAsync(s => s.UserId == userId);
+            if (existingSeller)
+                return BadRequest("User is already a seller");
+
+
             var seller = new Seller
             {
                 StoreName = request.StoreName,
-                UserId = request.UserId
+                UserId = userId
             };
 
             _context.Sellers.Add(seller);
 
+            user.Role = "Seller";
             await _context.SaveChangesAsync();
             var response = new SellerResponse
             {
