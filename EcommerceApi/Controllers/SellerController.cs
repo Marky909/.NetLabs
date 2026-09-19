@@ -12,7 +12,7 @@ namespace EcommerceApi.Controllers
     public class SellerController(EcommerceDbContext _context) : ControllerBase
     {
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Seller>> GetSellers()
+        public async Task<ActionResult<IEnumerable<Seller>>> GetSellers()
         {
             var sellers = _context.Sellers
                 .AsNoTracking()
@@ -22,6 +22,24 @@ namespace EcommerceApi.Controllers
                     StoreName = s.StoreName
                 })
                 .ToListAsync();
+
+            return Ok(sellers);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<IEnumerable<Seller>>> GetSellers(int id)
+        {
+            var sellers = _context.Sellers
+                .AsNoTracking()
+                .Where(s => s.Id == id)
+                .Select(s => new SellerResponse
+                {
+                    Id = s.Id,
+                    StoreName = s.StoreName
+                })
+                .FirstOrDefaultAsync();
+            if (sellers == null)
+                return NotFound($"The seller with {id} doesnt exist");
 
             return Ok(sellers);
         }
