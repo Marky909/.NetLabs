@@ -16,7 +16,7 @@ namespace EcommerceApi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Seller>>> GetSellers()
         {
-            var sellers = _context.Sellers
+            var sellers =await _context.Sellers
                 .AsNoTracking()
                 .Select(s => new SellerResponse
                 {
@@ -31,7 +31,7 @@ namespace EcommerceApi.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<IEnumerable<Seller>>> GetSellers(int id)
         {
-            var sellers = _context.Sellers
+            var seller =await _context.Sellers
                 .AsNoTracking()
                 .Where(s => s.Id == id)
                 .Select(s => new SellerResponse
@@ -40,10 +40,10 @@ namespace EcommerceApi.Controllers
                     StoreName = s.StoreName
                 })
                 .FirstOrDefaultAsync();
-            if (sellers == null)
+            if (seller == null)
                 return NotFound($"The seller with {id} doesnt exist");
 
-            return Ok(sellers);
+            return Ok(seller);
         }
         [Authorize]
         [HttpPost]
