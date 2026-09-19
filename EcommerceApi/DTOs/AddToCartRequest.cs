@@ -6,8 +6,8 @@ namespace EcommerceApi.DTOs
     {
         [Range(1, int.MaxValue)]
         public int ProductId { get; set; }
-        [Range(1, int.MaxValue)]
 
+        [Range(1, int.MaxValue)]
         public int QuantityId  { get; set; }
     }
 }
