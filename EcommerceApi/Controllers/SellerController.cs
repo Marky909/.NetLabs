@@ -43,5 +43,32 @@ namespace EcommerceApi.Controllers
 
             return Ok(sellers);
         }
+
+        [HttpPost]
+        public async Task<ActionResult<SellerResponse>> CreateSeller(CreateSellerRequest request)
+        {
+            var userExist =await _context.Users.AnyAsync(u => u.Id == request.UserId);
+
+            if (!userExist)
+            {
+                return BadRequest("User Not found!");
+            }
+            var seller = new Seller
+            {
+                StoreName = request.StoreName,
+                UserId = request.UserId
+            };
+
+            _context.Sellers.Add(seller);
+
+            await _context.SaveChangesAsync();
+            var response = new SellerResponse
+            {
+                Id = seller.Id,
+                StoreName = seller.StoreName
+            };
+
+            return Ok(response);
+        }
     }
 }
