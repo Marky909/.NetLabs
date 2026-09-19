@@ -11,6 +11,58 @@ namespace EcommerceApi.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class CartController(EcommerceDbContext context) : ControllerBase
+public class CartController(EcommerceDbContext _context) : ControllerBase
 {
+    [HttpPost("items")]
+    public async Task<ActionResult> AddToCart(AddToCartRequest request)
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (userIdClaim == null)
+            return Unauthorized();
+
+        var userId = int.Parse(userIdClaim.Value);
+
+        var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == request.ProductId);
+        if (product == null)
+            return NotFound("Product not Found");
+
+        if (product.Stock < request.Quantity)
+            return BadRequest("Not enough stock available");
+
+        var cart = await _context.Carts.FirstOrDefaultAsync(c => c.Id == userId);
+        if(cart == null)
+        {
+            cart = new Cart
+            {
+                UserId = userId
+            };
+            _context.Carts.Add(cart);
+            await _context.SaveChangesAsync();
+        }
+
+        var cartItem = await _context.CartItems.FirstOrDefaultAsync(ci => ci.CartId == cart.Id && ci.ProductId == request.ProductId);
+
+        if(cartItem!=null)
+        {
+            if (cartItem.Quantity + request.Quantity > product.Stock)
+                return BadRequest("Requested quantity exceeds available stock");
+
+            cartItem.Quantity += request.Quantity;
+        }
+        else
+        {
+            cartItem = new CartItem
+            {
+                CartId = cart.Id,
+                ProductId = request.ProductId,
+                Quantity = request.Quantity
+
+            };
+            
+        }
+        _context.CartItems.Add(cartItem);
+        await _context.SaveChangesAsync();
+
+        return Ok(cartItem);
+    }
 }
