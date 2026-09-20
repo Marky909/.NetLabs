@@ -1,5 +1,7 @@
 ﻿using EcommerceApi.Data;
 using EcommerceApi.DTOs;
+using EcommerceApi.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -173,6 +175,45 @@ namespace EcommerceApi.Controllers
             }
 
             return Ok(order);
+        }
+
+        [Authorize(Roles = "Seller")]
+        [HttpGet("seller")]
+        public async Task<ActionResult<IEnumerable<SellerOrderItemResponse>>> GetSellerOrders()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null)
+            {
+                return Unauthorized();
+            }
+
+            var userId = int.Parse(userIdClaim.Value);
+
+            var seller = await _context.Sellers
+                .FirstOrDefaultAsync(s => s.UserId == userId);
+
+            if (seller == null)
+            {
+                return NotFound("Seller profile not found.");
+            }
+
+            var items = await _context.OrderItems
+                .AsNoTracking()
+                .Where(oi => oi.Product.SellerId == seller.Id)
+                .Select(oi => new SellerOrderItemResponse
+                {
+                    OrderId = oi.OrderId,
+                    OrderItemId = oi.Id,
+                    ProductName = oi.Product.Name,
+                    Quantity = oi.Quantity,
+                    UnitPrice = oi.UnitPrice,
+                    Status = oi.Status,
+                    OrderDate = oi.Order.OrderDate
+                })
+                .ToListAsync();
+
+            return Ok(items);
         }
 
     }
