@@ -133,5 +133,47 @@ namespace EcommerceApi.Controllers
             return Ok(orders);
         }
 
+        [HttpGet("{id}")]
+        public async Task<ActionResult<OrderResponse>> GetOrder(int id)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null)
+            {
+                return Unauthorized();
+            }
+
+            var userId = int.Parse(userIdClaim.Value);
+
+            var order = await _context.Orders
+                .AsNoTracking()
+                .Where(o => o.Id == id && o.UserId == userId)
+                .Select(o => new OrderResponse
+                {
+                    Id = o.Id,
+                    OrderDate = o.OrderDate,
+                    Status = o.Status,
+
+                    TotalAmount = o.Items.Sum(oi =>
+                        oi.Quantity * oi.UnitPrice),
+
+                    Items = o.Items.Select(oi => new OrderItemResponse
+                    {
+                        ProductId = oi.ProductId,
+                        ProductName = oi.Product.Name,
+                        Quantity = oi.Quantity,
+                        UnitPrice = oi.UnitPrice
+                    }).ToList()
+                })
+                .FirstOrDefaultAsync();
+
+            if (order == null)
+            {
+                return NotFound("Order not found.");
+            }
+
+            return Ok(order);
+        }
+
     }
 }
