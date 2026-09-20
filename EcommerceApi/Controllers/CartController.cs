@@ -65,4 +65,39 @@ public class CartController(EcommerceDbContext _context) : ControllerBase
 
         return Ok(cartItem);
     }
+
+    [HttpGet]
+    public async Task<ActionResult<CartResponse>> GetMycart()
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (userIdClaim == null)
+            return Unauthorized();
+
+        var userId = int.Parse(userIdClaim.Value);
+
+
+        CartResponse? cart = await _context.Carts
+        .AsNoTracking()
+        .Where(c => c.UserId == userId)
+        .Select(c => new CartResponse
+        {
+            CartId = c.Id,
+
+            Items = c.Items.Select(ci => new CartItemResponse
+            {
+                ProductId = ci.ProductId,
+                ProductName = ci.Product.Name,
+                Price = ci.Product.Price,
+                Quantity = ci.Quantity
+            }).ToList()
+        })
+        .FirstOrDefaultAsync();
+        if (cart == null)
+        {
+            return NotFound("Cart not found.");
+        }
+
+        return Ok(cart);
+    
+}
 }
