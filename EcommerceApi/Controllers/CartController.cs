@@ -141,4 +141,33 @@ public class CartController : ControllerBase
 
         return Ok(cartItem);
     }
+    [HttpDelete("items/{productId}")]
+    public async Task<ActionResult> RemoveCartItem(int productId)
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+        if (userIdClaim == null)
+        {
+            return Unauthorized();
+        }
+
+        var userId = int.Parse(userIdClaim.Value);
+
+        var cartItem = await _context.CartItems
+            .Include(ci => ci.Cart)
+            .FirstOrDefaultAsync(ci =>
+                ci.ProductId == productId &&
+                ci.Cart.UserId == userId);
+
+        if (cartItem == null)
+        {
+            return NotFound("Cart item not found.");
+        }
+
+        _context.CartItems.Remove(cartItem);
+
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
 }
