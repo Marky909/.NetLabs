@@ -14,5 +14,5 @@ public class OrderItem
 
     public decimal UnitPrice { get; set; }
 
-    public string status { get; set; } = "pending";
+    public string Status { get; set; } = "pending";
 }
