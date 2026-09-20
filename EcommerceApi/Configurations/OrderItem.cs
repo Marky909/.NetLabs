@@ -23,5 +23,9 @@ public class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
             .WithMany()
             .HasForeignKey(oi => oi.ProductId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Property(oi => oi.status)
+            .IsRequired()
+            .HasMaxLength(50);
     }
 }
