@@ -1,4 +1,5 @@
 ﻿using EcommerceApi.Data;
+using EcommerceApi.DTOs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -93,6 +94,43 @@ namespace EcommerceApi.Controllers
                 await transaction.RollbackAsync();
                 throw;
             }
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<OrderResponse>>> GetMyOrders()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null)
+            {
+                return Unauthorized();
+            }
+
+            var userId = int.Parse(userIdClaim.Value);
+
+            var orders = await _context.Orders
+                .AsNoTracking()
+                .Where(o => o.UserId == userId)
+                .Select(o => new OrderResponse
+                {
+                    Id = o.Id,
+                    OrderDate = o.OrderDate,
+                    Status = o.Status,
+
+                    TotalAmount = o.Items.Sum(oi =>
+                        oi.Quantity * oi.UnitPrice),
+
+                    Items = o.Items.Select(oi => new OrderItemResponse
+                    {
+                        ProductId = oi.ProductId,
+                        ProductName = oi.Product.Name,
+                        Quantity = oi.Quantity,
+                        UnitPrice = oi.UnitPrice
+                    }).ToList()
+                })
+                .ToListAsync();
+
+            return Ok(orders);
         }
 
     }
