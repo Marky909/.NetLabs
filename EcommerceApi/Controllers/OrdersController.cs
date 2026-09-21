@@ -19,6 +19,7 @@ namespace EcommerceApi.Controllers
         {
             _context = context;
         }
+        [Authorize]
         [HttpPost("checkout")]
         public async Task<ActionResult> Checkout()
         {
