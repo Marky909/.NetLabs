@@ -112,7 +112,26 @@ namespace EcommerceApi.Controllers
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
 
-            return Ok(product);
+            var response = new ProductResponse
+            {
+                Id=product.Id,
+                Name=product.Name,
+                Price=product.Price,
+                Stock = product.Stock,
+                Seller = new SellerResponse
+                {
+                    Id=seller.Id,
+                    StoreName=seller.StoreName
+                },
+                Category = new CategoryResponse
+                {
+                    Id = request.CategoryId,
+                    Name = (await _context.Categories.FindAsync(request.CategoryId))?.Name ?? string.Empty
+                }
+
+            };
+
+            return Ok(response);
         }
 
         [Authorize(Roles="seller")]
