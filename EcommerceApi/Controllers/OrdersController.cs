@@ -217,5 +217,52 @@ namespace EcommerceApi.Controllers
             return Ok(items);
         }
 
+
+        [Authorize(Roles ="Seller")]
+        [HttpPut("Seller/items/{orderItemId}/status")]
+        public async Task<ActionResult> UpdateOrderItemStatus(int orderItemId,UpdateOrderItemStatusRequest request)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+                return Unauthorized("seller is not authorized");
+            var userId = int.Parse(userIdClaim.Value);
+
+            var seller = await _context.Sellers.FirstOrDefaultAsync(s => s.UserId == userId);
+            if (seller == null)
+                return NotFound("seller profile not Found");
+
+            var orderItem = await _context.OrderItems
+                               .Include(oi => oi.Product)
+                               .FirstOrDefaultAsync(oi => oi.Id == orderItemId && oi.Product.SellerId == seller.Id);
+
+            if (orderItem == null)
+                return NotFound("Order item not found");
+
+            var allowedStatuses = new[]
+            {
+                "Pending",
+                "Processing",
+                "Shipped",
+                "Delivered",
+                "Cancelled"
+            };
+
+            if (!allowedStatuses.Contains(request.Status))
+                return BadRequest("Invalid Order Status");
+
+            orderItem.Status = request.Status;
+
+            await _context.SaveChangesAsync();
+
+
+
+            return Ok(new
+            {
+                message="Order Item Status updated successfully",
+                orderItemId=orderItem.Id,
+                status = orderItem.Status
+            });
+        }
+
     }
 }
