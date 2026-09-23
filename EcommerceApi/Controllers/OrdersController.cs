@@ -1,5 +1,6 @@
 ﻿using EcommerceApi.Data;
 using EcommerceApi.DTOs;
+using EcommerceApi.Helpers;
 using EcommerceApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -60,7 +61,7 @@ namespace EcommerceApi.Controllers
                 {
                     UserId = userId,
                     OrderDate = DateTime.UtcNow,
-                    Status = "Pending"
+                    Status = OrderStatus.Pending
                 };
 
                 _context.Orders.Add(order);
@@ -72,7 +73,8 @@ namespace EcommerceApi.Controllers
                         Order = order,
                         ProductId = item.ProductId,
                         Quantity = item.Quantity,
-                        UnitPrice = item.Product.Price
+                        UnitPrice = item.Product.Price,
+                        Status = OrderStatus.Pending
                     };
 
                     _context.OrderItems.Add(orderItem);
@@ -238,17 +240,11 @@ namespace EcommerceApi.Controllers
             if (orderItem == null)
                 return NotFound("Order item not found");
 
-            var allowedStatuses = new[]
+            if(!OrderStatusRules.CanTransition(orderItem.Status,request.Status))
             {
-                "Pending",
-                "Processing",
-                "Shipped",
-                "Delivered",
-                "Cancelled"
-            };
+                return BadRequest($"Can't transit from {orderItem.Status} to {request.Status}");
+            }
 
-            if (!allowedStatuses.Contains(request.Status))
-                return BadRequest("Invalid Order Status");
 
             orderItem.Status = request.Status;
 
