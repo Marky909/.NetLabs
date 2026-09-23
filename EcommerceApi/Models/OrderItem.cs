@@ -1,4 +1,6 @@
-﻿namespace EcommerceApi.Models;
+﻿using EcommerceApi.Helpers;
+
+namespace EcommerceApi.Models;
 
 public class OrderItem
 {
@@ -14,5 +16,5 @@ public class OrderItem
 
     public decimal UnitPrice { get; set; }
 
-    public string Status { get; set; } = "pending";
+    public string Status { get; set; } = OrderStatus.Pending;
 }
