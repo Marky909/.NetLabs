@@ -9,7 +9,7 @@ namespace EcommerceApi.Services
         Task<OrderResponse?> GetMyOrderAsync(int orderId);
         Task<List<SellerOrderItemResponse>> GetSellerOrdersAsync();
 
-        Task UpdateOrderStatusAsync(
+        Task UpdateOrderItemStatusAsync(
             int orderItemId,
             string newStatus);
 
