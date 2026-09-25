@@ -12,7 +12,7 @@ namespace EcommerceApi.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public int? userId
+        public int? UserId
         {
             get
             {
@@ -23,7 +23,7 @@ namespace EcommerceApi.Services
 
                 if (!int.TryParse(claim.Value, out int userID))
                     return null;
-                return userId;
+                return UserId;
             }
         }
 
