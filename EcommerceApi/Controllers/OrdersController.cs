@@ -2,6 +2,7 @@
 using EcommerceApi.DTOs;
 using EcommerceApi.Helpers;
 using EcommerceApi.Models;
+using EcommerceApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -16,27 +17,30 @@ namespace EcommerceApi.Controllers
     {
         private readonly EcommerceDbContext _context;
 
-        public OrdersController(EcommerceDbContext context)
+        private readonly ICurrentUserService _currentUser;
+
+
+        public OrdersController(EcommerceDbContext context,ICurrentUserService currentUser)
         {
             _context = context;
+            _currentUser = currentUser;
         }
         [Authorize]
         [HttpPost("checkout")]
         public async Task<ActionResult> Checkout()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            var userId = _currentUser.UserId;
 
-            if (userIdClaim == null)
+            if (userId == null)
             {
                 return Unauthorized();
             }
 
-            var userId = int.Parse(userIdClaim.Value);
 
             var cart = await _context.Carts
                 .Include(c => c.Items)
                 .ThenInclude(ci => ci.Product)
-                .FirstOrDefaultAsync(c => c.UserId == userId);
+                .FirstOrDefaultAsync(c => c.UserId == userId.Value);
 
             if (cart == null || !cart.Items.Any())
             {
@@ -59,7 +63,7 @@ namespace EcommerceApi.Controllers
             {
                 var order = new Models.Order
                 {
-                    UserId = userId,
+                    UserId = userId.Value,
                     OrderDate = DateTime.UtcNow,
                     Status = OrderStatus.Pending
                 };
@@ -104,18 +108,17 @@ namespace EcommerceApi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<OrderResponse>>> GetMyOrders()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            var userId = _currentUser.UserId;
 
-            if (userIdClaim == null)
+            if (userId == null)
             {
                 return Unauthorized();
             }
 
-            var userId = int.Parse(userIdClaim.Value);
 
             var orders = await _context.Orders
                 .AsNoTracking()
-                .Where(o => o.UserId == userId)
+                .Where(o => o.UserId == userId.Value)
                 .Select(o => new OrderResponse
                 {
                     Id = o.Id,
@@ -141,18 +144,17 @@ namespace EcommerceApi.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<OrderResponse>> GetOrder(int id)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            var userId = _currentUser.UserId;
 
-            if (userIdClaim == null)
+            if (userId == null)
             {
                 return Unauthorized();
             }
 
-            var userId = int.Parse(userIdClaim.Value);
 
             var order = await _context.Orders
                 .AsNoTracking()
-                .Where(o => o.Id == id && o.UserId == userId)
+                .Where(o => o.Id == id && o.UserId == userId.Value)
                 .Select(o => new OrderResponse
                 {
                     Id = o.Id,
@@ -184,17 +186,16 @@ namespace EcommerceApi.Controllers
         [HttpGet("seller")]
         public async Task<ActionResult<IEnumerable<SellerOrderItemResponse>>> GetSellerOrders()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            var userId = _currentUser.UserId;
 
-            if (userIdClaim == null)
+            if (userId == null)
             {
                 return Unauthorized();
             }
 
-            var userId = int.Parse(userIdClaim.Value);
 
             var seller = await _context.Sellers
-                .FirstOrDefaultAsync(s => s.UserId == userId);
+                .FirstOrDefaultAsync(s => s.UserId == userId.Value);
 
             if (seller == null)
             {
@@ -224,12 +225,12 @@ namespace EcommerceApi.Controllers
         [HttpPut("Seller/items/{orderItemId}/status")]
         public async Task<ActionResult> UpdateOrderItemStatus(int orderItemId,UpdateOrderItemStatusRequest request)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null)
-                return Unauthorized("seller is not authorized");
-            var userId = int.Parse(userIdClaim.Value);
+            var userId = _currentUser.UserId;
 
-            var seller = await _context.Sellers.FirstOrDefaultAsync(s => s.UserId == userId);
+            if (userId == null)
+                return Unauthorized("seller is not authorized");
+
+            var seller = await _context.Sellers.FirstOrDefaultAsync(s => s.UserId == userId.Value);
             if (seller == null)
                 return NotFound("seller profile not Found");
 
