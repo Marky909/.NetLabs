@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Validation;
+using System.Linq.Expressions;
 using System.Security.Claims;
 
 namespace EcommerceApi.Controllers
@@ -49,120 +51,53 @@ namespace EcommerceApi.Controllers
                 return BadRequest(ex.Message);
             }
         }
-
+        [Authorize]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<OrderResponse>>> GetMyOrders()
+        public async Task<ActionResult<List<OrderResponse>>> GetMyOrders()
         {
-            var userId = _currentUser.UserId;
-
-            if (userId == null)
+            try
+            {
+                var orders =await _orderService.GetMyOrdersAsync();
+                return Ok(orders);
+            }
+            catch(UnauthorizedAccessException)
             {
                 return Unauthorized();
             }
-
-
-            var orders = await _context.Orders
-                .AsNoTracking()
-                .Where(o => o.UserId == userId.Value)
-                .Select(o => new OrderResponse
-                {
-                    Id = o.Id,
-                    OrderDate = o.OrderDate,
-                    Status = o.Status,
-
-                    TotalAmount = o.Items.Sum(oi =>
-                        oi.Quantity * oi.UnitPrice),
-
-                    Items = o.Items.Select(oi => new OrderItemResponse
-                    {
-                        ProductId = oi.ProductId,
-                        ProductName = oi.Product.Name,
-                        Quantity = oi.Quantity,
-                        UnitPrice = oi.UnitPrice
-                    }).ToList()
-                })
-                .ToListAsync();
-
-            return Ok(orders);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<OrderResponse>> GetOrder(int id)
         {
-            var userId = _currentUser.UserId;
-
-            if (userId == null)
+            try
+            {
+                var order = _orderService.GetMyOrderAsync(id);
+                return Ok(order);
+            }
+            catch(UnauthorizedAccessException)
             {
                 return Unauthorized();
             }
-
-
-            var order = await _context.Orders
-                .AsNoTracking()
-                .Where(o => o.Id == id && o.UserId == userId.Value)
-                .Select(o => new OrderResponse
-                {
-                    Id = o.Id,
-                    OrderDate = o.OrderDate,
-                    Status = o.Status,
-
-                    TotalAmount = o.Items.Sum(oi =>
-                        oi.Quantity * oi.UnitPrice),
-
-                    Items = o.Items.Select(oi => new OrderItemResponse
-                    {
-                        ProductId = oi.ProductId,
-                        ProductName = oi.Product.Name,
-                        Quantity = oi.Quantity,
-                        UnitPrice = oi.UnitPrice
-                    }).ToList()
-                })
-                .FirstOrDefaultAsync();
-
-            if (order == null)
-            {
-                return NotFound("Order not found.");
-            }
-
-            return Ok(order);
         }
 
         [Authorize(Roles = "Seller")]
         [HttpGet("seller")]
-        public async Task<ActionResult<IEnumerable<SellerOrderItemResponse>>> GetSellerOrders()
+        public async Task<ActionResult<List<SellerOrderItemResponse>>> GetSellerOrders()
         {
-            var userId = _currentUser.UserId;
+            try
+            {
+                var items = await _orderService.GetSellerOrdersAsync();
 
-            if (userId == null)
+                return Ok(items);
+            }
+            catch (UnauthorizedAccessException)
             {
                 return Unauthorized();
             }
-
-
-            var seller = await _context.Sellers
-                .FirstOrDefaultAsync(s => s.UserId == userId.Value);
-
-            if (seller == null)
+            catch (KeyNotFoundException ex)
             {
-                return NotFound("Seller profile not found.");
+                return NotFound(ex.Message);
             }
-
-            var items = await _context.OrderItems
-                .AsNoTracking()
-                .Where(oi => oi.Product.SellerId == seller.Id)
-                .Select(oi => new SellerOrderItemResponse
-                {
-                    OrderId = oi.OrderId,
-                    OrderItemId = oi.Id,
-                    ProductName = oi.Product.Name,
-                    Quantity = oi.Quantity,
-                    UnitPrice = oi.UnitPrice,
-                    Status = oi.Status,
-                    OrderDate = oi.Order.OrderDate
-                })
-                .ToListAsync();
-
-            return Ok(items);
         }
 
 
@@ -170,64 +105,35 @@ namespace EcommerceApi.Controllers
         [HttpPut("Seller/items/{orderItemId}/status")]
         public async Task<ActionResult> UpdateOrderItemStatus(int orderItemId,UpdateOrderItemStatusRequest request)
         {
-            var userId = _currentUser.UserId;
-
-            if (userId == null)
-                return Unauthorized("seller is not authorized");
-
-            var seller = await _context.Sellers.FirstOrDefaultAsync(s => s.UserId == userId.Value);
-            if (seller == null)
-                return NotFound("seller profile not Found");
-
-            var orderItem = await _context.OrderItems
-                               .Include(oi => oi.Product)
-                               .FirstOrDefaultAsync(oi => oi.Id == orderItemId && oi.Product.SellerId == seller.Id);
-
-            if (orderItem == null)
-                return NotFound("Order item not found");
-
-            if(!OrderStatusRules.CanTransition(orderItem.Status,request.Status))
+            try
             {
-                return BadRequest($"Can't transit from {orderItem.Status} to {request.Status}");
+                await _orderService.UpdateOrderStatusAsync(orderItemId, request.Status);
+                return Ok(new
+                {
+                    message = "Order Item status updated successfully.",
+                    orderItemId,
+                    status=request.Status
+                });
             }
-
-
-            orderItem.Status = request.Status;
-
-            await _context.SaveChangesAsync();
-
-
-
-            return Ok(new
+            catch(UnauthorizedAccessException)
             {
-                message="Order Item Status updated successfully",
-                orderItemId=orderItem.Id,
-                status = orderItem.Status
-            });
+                return Unauthorized();
+            }
+            catch(KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch(InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
-        [Authorize(Roles ="Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpGet("admin")]
-        public async Task<ActionResult<IEnumerable<AdminOrderResponse>>> GetAllOrders()
+        public async Task<ActionResult<List<AdminOrderResponse>>> GetAllOrders()
         {
-            var orders = await _context.Orders
-                .AsNoTracking()
-                .Select(o => new AdminOrderResponse
-                {
-                    OrderId = o.Id,
-                    UserId = o.UserId,
-                    OrderDate = o.OrderDate,
-                    Items = o.Items.Select(oi => new AdminOrderItemResponse
-                    {
-                        OrderItemId = oi.Id,
-                        ProductName = oi.Product.Name,
-                        SellerName = oi.Product.Seller.StoreName,
-                        Quantity = oi.Quantity,
-                        UnitPrice = oi.UnitPrice,
-                        Status = oi.Status
-                    }).ToList()
-                })
-                .ToListAsync();
+            var orders = await _orderService.GetAdminOrdersAsync();
 
             return Ok(orders);
         }
