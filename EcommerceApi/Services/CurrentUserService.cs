@@ -21,9 +21,9 @@ namespace EcommerceApi.Services
                 if (claim == null)
                     return null;
 
-                if (!int.TryParse(claim.Value, out int userID))
+                if (!int.TryParse(claim.Value, out int userId))
                     return null;
-                return UserId;
+                return userId;
             }
         }
 
