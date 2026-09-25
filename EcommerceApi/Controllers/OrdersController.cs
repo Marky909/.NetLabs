@@ -19,89 +19,34 @@ namespace EcommerceApi.Controllers
 
         private readonly ICurrentUserService _currentUser;
 
+        private readonly IOrderService _orderService;
 
-        public OrdersController(EcommerceDbContext context,ICurrentUserService currentUser)
+
+        public OrdersController(EcommerceDbContext context,ICurrentUserService currentUser,IOrderService orderService)
         {
             _context = context;
             _currentUser = currentUser;
+            _orderService = orderService;
         }
         [Authorize]
         [HttpPost("checkout")]
         public async Task<ActionResult> Checkout()
         {
-            var userId = _currentUser.UserId;
-
-            if (userId == null)
+            try
+            {
+                var orderId = await _orderService.CheckOutAsync();
+                return Ok(new {
+                    message = "Order Created Successfully",
+                    orderId
+                });
+            }
+            catch(UnauthorizedAccessException)
             {
                 return Unauthorized();
             }
-
-
-            var cart = await _context.Carts
-                .Include(c => c.Items)
-                .ThenInclude(ci => ci.Product)
-                .FirstOrDefaultAsync(c => c.UserId == userId.Value);
-
-            if (cart == null || !cart.Items.Any())
+            catch(InvalidOperationException ex)
             {
-                return BadRequest("Cart is empty.");
-            }
-
-            foreach (var item in cart.Items)
-            {
-                if (item.Quantity > item.Product.Stock)
-                {
-                    return BadRequest(
-                        $"Not enough stock for {item.Product.Name}.");
-                }
-            }
-
-            await using var transaction =
-                await _context.Database.BeginTransactionAsync();
-
-            try
-            {
-                var order = new Models.Order
-                {
-                    UserId = userId.Value,
-                    OrderDate = DateTime.UtcNow,
-                    Status = OrderStatus.Pending
-                };
-
-                _context.Orders.Add(order);
-
-                foreach (var item in cart.Items)
-                {
-                    var orderItem = new Models.OrderItem
-                    {
-                        Order = order,
-                        ProductId = item.ProductId,
-                        Quantity = item.Quantity,
-                        UnitPrice = item.Product.Price,
-                        Status = OrderStatus.Pending
-                    };
-
-                    _context.OrderItems.Add(orderItem);
-
-                    item.Product.Stock -= item.Quantity;
-                }
-
-                _context.CartItems.RemoveRange(cart.Items);
-
-                await _context.SaveChangesAsync();
-
-                await transaction.CommitAsync();
-
-                return Ok(new
-                {
-                    message = "Order created successfully.",
-                    orderId = order.Id
-                });
-            }
-            catch
-            {
-                await transaction.RollbackAsync();
-                throw;
+                return BadRequest(ex.Message);
             }
         }
 
