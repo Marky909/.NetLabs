@@ -107,7 +107,7 @@ namespace EcommerceApi.Controllers
         {
             try
             {
-                await _orderService.UpdateOrderStatusAsync(orderItemId, request.Status);
+                await _orderService.UpdateOrderItemStatusAsync(orderItemId, request.Status);
                 return Ok(new
                 {
                     message = "Order Item status updated successfully.",
