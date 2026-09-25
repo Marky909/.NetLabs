@@ -1,5 +1,7 @@
 ﻿using EcommerceApi.Data;
+using EcommerceApi.DTOs;
 using EcommerceApi.Helpers;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceApi.Services
@@ -89,5 +91,155 @@ namespace EcommerceApi.Services
                 throw;
             }
         }
+
+        public async Task<List<OrderResponse>> GetMyOrdersAsync()
+        {
+            var userId = _currentUser.UserId;
+
+            if (userId == null)
+            {
+                throw new UnauthorizedAccessException();
+            }
+
+            var orders = await _context.Orders
+                .AsNoTracking()
+                .Where(o => o.UserId == userId.Value)
+                .Select(o => new OrderResponse
+                {
+                    Id = o.Id,
+                    OrderDate = o.OrderDate,
+                    Status = o.Status,
+
+                    TotalAmount = o.Items.Sum(oi =>
+                        oi.Quantity * oi.UnitPrice),
+
+                    Items = o.Items.Select(oi => new OrderItemResponse
+                    {
+                        ProductId = oi.ProductId,
+                        ProductName = oi.Product.Name,
+                        Quantity = oi.Quantity,
+                        UnitPrice = oi.UnitPrice
+                    }).ToList()
+                })
+                .ToListAsync();
+
+            return orders;
+        }
+        public async Task<OrderResponse?> GetMyOrderAsync(int orderId)
+
+        {
+            var userId = _currentUser.UserId;
+
+            if (userId == null)
+            {
+                throw new UnauthorizedAccessException();
+            }
+
+
+            var order = await _context.Orders
+                .AsNoTracking()
+                .Where(o => o.Id == orderId && o.UserId == userId.Value)
+                .Select(o => new OrderResponse
+                {
+                    Id = o.Id,
+                    OrderDate = o.OrderDate,
+                    Status = o.Status,
+
+                    TotalAmount = o.Items.Sum(oi =>
+                        oi.Quantity * oi.UnitPrice),
+
+                    Items = o.Items.Select(oi => new OrderItemResponse
+                    {
+                        ProductId = oi.ProductId,
+                        ProductName = oi.Product.Name,
+                        Quantity = oi.Quantity,
+                        UnitPrice = oi.UnitPrice
+                    }).ToList()
+                })
+                .FirstOrDefaultAsync();
+
+            return order;
+        }
+
+        public async Task<List<SellerOrderItemResponse>> GetSellerOrdersAsync()
+        {
+            var userId = _currentUser.UserId;
+
+            if (userId == null)
+            {
+                throw new UnauthorizedAccessException();
+            }
+
+            var seller = await _context.Sellers
+                .FirstOrDefaultAsync(s => s.UserId == userId.Value);
+
+            if (seller == null)
+            {
+                throw new KeyNotFoundException("Seller profile not found.");
+            }
+
+            var items = await _context.OrderItems
+                .AsNoTracking()
+                .Where(oi => oi.Product.SellerId == seller.Id)
+                .Select(oi => new SellerOrderItemResponse
+                {
+                    OrderId = oi.OrderId,
+                    OrderItemId = oi.Id,
+                    ProductName = oi.Product.Name,
+                    Quantity = oi.Quantity,
+                    UnitPrice = oi.UnitPrice,
+                    Status = oi.Status,
+                    OrderDate = oi.Order.OrderDate
+                })
+                .ToListAsync();
+
+            return items;
+        }
+        public async Task UpdateOrderItemStatusAsync(
+                int orderItemId,
+                string newStatus)
+        {
+            var userId = _currentUser.UserId;
+
+            if (userId == null)
+            {
+                throw new UnauthorizedAccessException();
+            }
+
+            var seller = await _context.Sellers
+                .FirstOrDefaultAsync(s => s.UserId == userId.Value);
+
+            if (seller == null)
+            {
+                throw new KeyNotFoundException(
+                    "Seller profile not found.");
+            }
+
+            var orderItem = await _context.OrderItems
+                .Include(oi => oi.Product)
+                .FirstOrDefaultAsync(
+                    oi => oi.Id == orderItemId &&
+                          oi.Product.SellerId == seller.Id);
+
+            if (orderItem == null)
+            {
+                throw new KeyNotFoundException(
+                    "Order item not found.");
+            }
+
+            if (!OrderStatusRules.CanTransition(
+                    orderItem.Status,
+                    newStatus))
+            {
+                throw new InvalidOperationException(
+                    $"Can't transition from {orderItem.Status} to {newStatus}.");
+            }
+
+            orderItem.Status = newStatus;
+
+            await _context.SaveChangesAsync();
+        }
+        
+
     }
 }
