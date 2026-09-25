@@ -239,7 +239,30 @@ namespace EcommerceApi.Services
 
             await _context.SaveChangesAsync();
         }
-        
+        public async Task<List<AdminOrderResponse>> GetAdminOrdersAsync()
+        {
+            var orders = await _context.Orders
+                .AsNoTracking()
+                .Select(o => new AdminOrderResponse
+                {
+                    OrderId = o.Id,
+                    UserId = o.UserId,
+                    OrderDate = o.OrderDate,
+
+                    Items = o.Items.Select(oi => new AdminOrderItemResponse
+                    {
+                        OrderItemId = oi.Id,
+                        ProductName = oi.Product.Name,
+                        SellerName = oi.Product.Seller.StoreName,
+                        Quantity = oi.Quantity,
+                        UnitPrice = oi.UnitPrice,
+                        Status = oi.Status
+                    }).ToList()
+                })
+                .ToListAsync();
+
+            return orders;
+        }
 
     }
 }
