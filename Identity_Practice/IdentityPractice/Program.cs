@@ -1,11 +1,10 @@
 using IdentityPractice.Data;
 using IdentityPractice.Models;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add MVC
 builder.Services.AddControllersWithViews();
 
 // Database
@@ -13,11 +12,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Identity
+// ASP.NET Core Identity
 builder.Services
-    .AddIdentityCore<ApplicationUser>()
+    .AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddSignInManager();
+    .AddDefaultTokenProviders();
 
 // Password settings
 builder.Services.Configure<IdentityOptions>(options =>
@@ -39,7 +38,6 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 var app = builder.Build();
 
-// Configure HTTP request pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -50,7 +48,6 @@ app.UseHttpsRedirection();
 
 app.UseRouting();
 
-// Authentication MUST come before Authorization
 app.UseAuthentication();
 app.UseAuthorization();
 
