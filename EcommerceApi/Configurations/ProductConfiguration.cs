@@ -28,6 +28,10 @@ namespace EcommerceApi.Configurations
                 .HasForeignKey(p => p.CategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            builder.Property(p => p.RowVersion)
+                .IsRowVersion()
+                .IsConcurrencyToken();          
+
             builder.HasIndex(p => p.Name);
         }
     }
