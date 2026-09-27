@@ -1,8 +1,10 @@
 ﻿using EcommerceApi.Data;
 using EcommerceApi.DTOs;
+using EcommerceApi.Exceptions;
 using EcommerceApi.Helpers;
-using Microsoft.AspNetCore.Mvc;
+using EcommerceApi.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace EcommerceApi.Services
 {
@@ -35,14 +37,14 @@ namespace EcommerceApi.Services
 
             if (cart == null || !cart.Items.Any())
             {
-                throw new InvalidOperationException("Cart is empty.");
+                throw new BadRequestException("Cart is empty.");
             }
 
             foreach (var item in cart.Items)
             {
                 if (item.Quantity > item.Product.Stock)
                 {
-                    throw new InvalidOperationException(
+                    throw new BadRequestException(
                         $"Not enough stock for {item.Product.Name}.");
                 }
             }
@@ -84,6 +86,14 @@ namespace EcommerceApi.Services
                 await transaction.CommitAsync();
 
                 return order.Id;
+            }
+
+            catch (DbUpdateConcurrencyException)
+            {
+                await transaction.RollbackAsync();
+
+                throw new ConcurrencyException(
+                    "The stock changed while you were checking out. Please try again.");
             }
             catch
             {
@@ -175,7 +185,7 @@ namespace EcommerceApi.Services
 
             if (seller == null)
             {
-                throw new KeyNotFoundException("Seller profile not found.");
+                throw new NotFoundException("Seller profile not found.");
             }
 
             var items = await _context.OrderItems
