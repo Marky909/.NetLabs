@@ -101,34 +101,23 @@ namespace EcommerceApi.Controllers
         }
 
 
-        [Authorize(Roles ="Seller")]
-        [HttpPut("Seller/items/{orderItemId}/status")]
-        public async Task<ActionResult> UpdateOrderItemStatus(int orderItemId,UpdateOrderItemStatusRequest request)
+        [Authorize(Roles = "Seller")]
+        [HttpPut("seller/items/{orderItemId}/status")]
+        public async Task<ActionResult> UpdateOrderItemStatus(
+            int orderItemId,
+            UpdateOrderItemStatusRequest request)
         {
-            try
-            {
-                await _orderService.UpdateOrderItemStatusAsync(orderItemId, request.Status);
-                return Ok(new
-                {
-                    message = "Order Item status updated successfully.",
-                    orderItemId,
-                    status=request.Status
-                });
-            }
-            catch(UnauthorizedAccessException)
-            {
-                return Unauthorized();
-            }
-            catch(KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch(InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
+            await _orderService.UpdateOrderItemStatusAsync(
+                orderItemId,
+                request.Status);
 
+            return Ok(new
+            {
+                message = "Order item status updated successfully.",
+                orderItemId,
+                status = request.Status
+            });
+        }
         [Authorize(Roles = "Admin")]
         [HttpGet("admin")]
         public async Task<ActionResult<List<AdminOrderResponse>>> GetAllOrders()
