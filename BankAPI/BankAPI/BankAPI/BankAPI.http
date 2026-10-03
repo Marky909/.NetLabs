@@ -1,0 +1,11 @@
+@BankAPI_HostAddress = http://localhost:5090
+
+GET {{BankAPI_HostAddress}}/openapi/v1.json
+Accept: application/json
+
+###
+
+GET {{BankAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
