@@ -8,11 +8,11 @@
         {
             if(amount<=0)
             {
-                throw new Exception("Withdrawl amount must be greater than 0");
+                throw new ArgumentException("Withdrawl amount must be greater than 0");
             }
 
             if (amount > _balance)
-                throw new Exception("Withdrawal amount cant exceed the total bank balance");
+                throw new InsufficientExecutionStackException("Withdrawal amount cant exceed the total bank balance");
 
 
             _balance -= amount;
