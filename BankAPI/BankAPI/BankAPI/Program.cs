@@ -1,3 +1,4 @@
+using BankApi.Exceptions;
 using BankAPI.Services;
 using Scalar.AspNetCore;
 
@@ -9,7 +10,7 @@ builder.Services.AddSingleton<BankService>();
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
