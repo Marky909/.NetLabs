@@ -2,15 +2,21 @@
 {
     public class Tests
     {
-        [SetUp]
-        public void Setup()
-        {
-        }
+       
 
         [Test]
         public void Test1()
         {
-            Assert.Pass();
+            //Arrange
+            int a = 5, b = 3;
+
+            //Act
+            int result = a + b;
+
+
+            //Assert
+            Assert.That(result, Is.EqualTo(10));
+
         }
     }
 }
