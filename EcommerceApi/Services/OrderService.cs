@@ -2,7 +2,6 @@
 using EcommerceApi.DTOs;
 using EcommerceApi.Exceptions;
 using EcommerceApi.Helpers;
-using EcommerceApi.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 
@@ -221,7 +220,7 @@ namespace EcommerceApi.Services
 
             if (seller == null)
             {
-                throw new KeyNotFoundException(
+                throw new NotFoundException(
                     "Seller profile not found.");
             }
 
@@ -233,7 +232,7 @@ namespace EcommerceApi.Services
 
             if (orderItem == null)
             {
-                throw new KeyNotFoundException(
+                throw new NotFoundException(
                     "Order item not found.");
             }
 
@@ -241,7 +240,7 @@ namespace EcommerceApi.Services
                     orderItem.Status,
                     newStatus))
             {
-                throw new InvalidOperationException(
+                throw new BadRequestException(
                     $"Can't transition from {orderItem.Status} to {newStatus}.");
             }
 
