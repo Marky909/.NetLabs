@@ -1,5 +1,5 @@
 using EcommerceApi.Data;
-using EcommerceApi.Middleware;
+using EcommerceApi.Exceptions;
 using EcommerceApi.Models;
 using EcommerceApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -12,6 +12,8 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
@@ -91,9 +93,8 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.MapScalarApiReference();
 }
-app.UseMiddleware<ExceptionMiddleware>();
 app.UseHttpsRedirection();
-
+app.UseExceptionHandler();
 app.UseAuthentication();
 app.UseAuthorization();
 
