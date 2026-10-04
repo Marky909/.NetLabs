@@ -1,9 +1,16 @@
-﻿namespace EcommerceApi.DTOs
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace EcommerceApi.DTOs
 {
     public class RegisterRequest
     {
+        [Required]
         public  string Username { get; set; } ="";
-        public  string Email { get; set; }    ="";
+        [Required]
+
+        public string Email { get; set; }    ="";
+        [Required]
+
         public string Password { get; set; } = "";
 
     }
