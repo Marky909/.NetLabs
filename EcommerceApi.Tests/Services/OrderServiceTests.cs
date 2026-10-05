@@ -26,4 +26,25 @@ public class OrderServiceTests
 
         return mock;
     }
+
+    [Test]
+    public void CheckOutAsync_WhenUserIsNotLoggedIn_ThrowsUnauthorizedAccessException()
+    {
+        //Arrange
+        var context = CreateDbContext();
+
+        var currentUser = new Mock<ICurrentUserService>();
+
+
+        currentUser.Setup(x => x.UserId)
+            .Returns((int?)null);
+
+        var service = new OrderService(context, currentUser.Object);
+
+
+        //Act + Assert
+
+        Assert.ThrowsAsync<UnauthorizedAccessException>(
+            async () => await service.CheckOutAsync());
+    }
 }
