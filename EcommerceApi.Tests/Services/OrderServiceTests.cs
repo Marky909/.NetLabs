@@ -1,4 +1,5 @@
 ﻿using EcommerceApi.Data;
+using EcommerceApi.Exceptions;
 using EcommerceApi.Services;
 using Microsoft.EntityFrameworkCore;
 using Moq;
@@ -46,5 +47,28 @@ public class OrderServiceTests
 
         Assert.ThrowsAsync<UnauthorizedAccessException>(
             async () => await service.CheckOutAsync());
+    }
+
+
+    [Test]
+    public void CheckOutAsync_WhenCartIsEmpty_ThrowsBadRequestException()
+    {
+        // Arrange
+        var context = CreateDbContext();
+
+        var currentUser = CreateCurrentUserMock(1);
+
+        var service = new OrderService(
+            context,
+            currentUser.Object);
+
+        // Act
+        var exception = Assert.ThrowsAsync<BadRequestException>(
+            async () => await service.CheckOutAsync());
+
+        // Assert
+        Assert.That(
+            exception!.Message,
+            Is.EqualTo("Cart is empty."));
     }
 }
